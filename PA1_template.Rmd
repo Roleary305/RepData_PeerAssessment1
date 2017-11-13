@@ -8,32 +8,61 @@ output:
 
 ## Loading and preprocessing the data
 
-```{r Loading Data, echo = FALSE}
+```{r Loading Data, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(dplyr)
 options(dplyr.print_max = 100)
 dataset <- read.csv(unz("activity.zip","activity.csv"))
-dataset$date <- as.Date(dataset$date, "%Y%m%d")
+#dataset$date <- as.Date(dataset$date, "%Y%m%d")
 
 ```
 
 ## What is mean total number of steps taken per day?
 ```{r}
 
-stepsDayTotal <- group_by(dataset, date) %>% summarise( sum = sum(steps), mean = mean(steps, na.rm = TRUE), median = median(steps))
+stepsDayTotal <- group_by(dataset, date) %>% summarise( sum = sum(steps))
 
-#hist(stepsDayTotal$sum)
+hist(stepsDayTotal$sum, breaks = 10)
 
-print(stepsDayTotal)
-
+mean(stepsDayTotal$sum, na.rm = TRUE)
+median(stepsDayTotal$sum, na.rm = TRUE)
 ```
 
 
 ## What is the average daily activity pattern?
 
+```{r}
+stepsByinterval <- group_by(dataset, as.factor(interval)) %>% summarise(sum(steps, na.rm = TRUE), mean = mean(steps, na.rm = TRUE))
+names(stepsByinterval) <- c("interval","sum","mean")
+
+plot(stepsByinterval$sum ~ stepsByinterval$interval)
+lines(stepsByinterval$sum ~ stepsByinterval$interval, type = "l")
+stepsByinterval[which.max(stepsByinterval$sum),]
+
+```
 
 
 ## Imputing missing values
+A sum is made of all missing values then dataset and stepsByinterval tables are merged. This is for the purpose of replacing all the NA in the steps collum with the interval mean.
 
 
+```{r}
+
+sum(is.na(dataset$steps))
+mrg <- merge(dataset, stepsByinterval, by.x = "interval", by.y = "interval")
+
+for (i in seq_along(mrg$steps)){
+  if (is.na(mrg$steps[i]) == TRUE){mrg$steps[i] <- mrg$mean[i]}
+}
+
+newsummary <- group_by(mrg, date) %>% summarise( sum = sum(steps))
+
+hist(newsummary$sum, breaks = 10)
+
+mean(newsummary$sum, na.rm = TRUE)
+median(newsummary$sum, na.rm = TRUE)
+
+```
+The methods of filling in the NA's has caused the mean and median to be the same value.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
