@@ -8,10 +8,24 @@ output:
 
 ## Loading and preprocessing the data
 
+```{r Loading Data, echo = FALSE}
+library(dplyr)
+options(dplyr.print_max = 100)
+dataset <- read.csv(unz("activity.zip","activity.csv"))
+dataset$date <- as.Date(dataset$date, "%Y%m%d")
 
+```
 
 ## What is mean total number of steps taken per day?
+```{r}
 
+stepsDayTotal <- group_by(dataset, date) %>% summarise( sum = sum(steps), mean = mean(steps, na.rm = TRUE), median = median(steps))
+
+#hist(stepsDayTotal$sum)
+
+print(stepsDayTotal)
+
+```
 
 
 ## What is the average daily activity pattern?
