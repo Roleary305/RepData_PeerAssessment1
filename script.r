@@ -13,6 +13,6 @@ stepsDaySummary <- data.frame(Date = unique(dataset$Date),
 				 median = tapply(dataset$steps, dataset$Date, FUN = median))
 				 
 for (i in seq_along(mrg$steps)){
-if (is.na(mrg$steps[i]) == TRUE){mrg$steps[i] = mrg$mean[i]}
+if (is.na(mrg$steps[i]) == TRUE){mrg$steps[i] <- mrg$mean[i]}
 
 }
